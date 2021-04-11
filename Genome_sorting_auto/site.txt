@@ -1,0 +1,25 @@
+Track (DataBase)val: 	knownGene
+			refSeqComposite
+
+Table id: 	hgta_table
+Table val:	ncbiRefSeq
+			knownGene
+
+Region id:	hgta_regionType_genome
+
+Paste list id:	hgta_doPasteIdentifiers
+
+Key TB name:	hgta_pastedIdentifiers
+Key SBMT name:	hgta_doPastedIdentiers
+
+OutputF id:	outputTypeDropdown
+OutputF value:	selectedFields
+
+FIle name id: 	hgta_outFileName
+Get OUT id: 	hgta_doTopSubmit 
+
+Save_f id:		hgta_doPrintSelectedFields
+
+prva faza: track, region, ident 
+ako nema warn
+druga faza: format, name, output

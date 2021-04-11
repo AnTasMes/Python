@@ -1,0 +1,3 @@
+#name	chrom	txStart	txEnd	exonCount	name2
+NM_001515.3	chr5	71035123	71067670	16	GTF2H2
+NM_001515.3	chr5_KI270897v1_alt	583509	616049	16	GTF2H2

@@ -1,0 +1,16 @@
+database = {refSeqComposite, knownGene}
+table = {ncbiRefSeq, knownGene}
+check = {name, chrom, txStart, txEnd, exonCount, name2, thickStart, thickEnd}
+file_name = genome.txt
+output_file_name = excel_gen.xlsx
+TTL = 10
+dwnld_dir = C:\Users\akita\Downloads
+URL = https://genome.ucsc.edu/cgi-bin/hgTables
+delete_dwnld_file = 1
+
+
+#database je default i koristice se u slucaju greske
+#delete_dwnld_file '1' brise skinut fajl (0 ako hoces da ga zadrzis )
+#default check: txStart txEnd chrom (ove ne brisati)
+
+
