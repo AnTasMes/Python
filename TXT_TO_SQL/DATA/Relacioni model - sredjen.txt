@@ -1,0 +1,111 @@
+Region (#ID_Region, Naziv, VremenskaZona)
+Igrica (#ID_Igrica, Naziv)
+StanjeAktivnosti (#ID_Aktiv, Vrednost)
+Grad (#ID_grad, Naziv, BrojStanovnika)
+
+Server (#ID_Server, BoostNivo, BrojKorisnika, Naziv, URL, ID_Region)
+	Server (ID_Region) referencira Region (ID_Region)
+
+Kategorija (#ID_Kategorija, Naziv, ID_Server)
+	Kategorija (ID_Server) referencira Server (ID_Server)  
+
+Kanal (#ID_Kanal, Naziv, MxKorisnika, ListaPoziva, ID_Kategorija)
+	Kanal (ID_Kategorija) referencira Kategorija (ID_Kategorija)
+
+_tekst (Brzina, tema, #ID_Kanal)
+	_tekst (ID_Kanal) referencira Kanal (ID_Kanal)
+
+_glas (Protok, #ID_Kanal)
+	_glas (ID_Kanal) referencira Kanal (ID_Kanal)
+
+Pozivnica (#ID_Poziv, VremeTrajanja, URL, ID_Server)
+	Pozivnica (ID_Server) referencira Server (ID_Server)
+
+Dozvola (#ID_Dozvola, Naziv, Pozicija, Podrazumevana, Boja, Prikaz, ID_Server)
+	Dozvola (ID_Server) referencira Server (ID_Server)
+
+_admin (Tip, #ID_Dozvola)
+	_admin (ID_Dozvola) referencira Dozvola (ID_Dozvola)
+_osnovna (Tema, #ID_Dozvola)
+	_osnovna (ID_Dozvola) referencira Dozvola (ID_Dozvola)
+Poziv (#ID_Poziv, Trajanje, Kvalitet, ID_Kanal)
+	Poziv (ID_Kanal) referencira _glas (ID_Kanal)
+
+Video_snimak (#ID_Snimak, Kvalitet, Trajanje, ID_Poziv)
+	Video_snimak (ID_Poziv) referencira Poziv (ID_Poziv)
+
+Poruka (#ID_Poruka, Vrednost, BrojKaraktera, URL, VremeSlanja, ID_Koris, Diskriminator, ID_Kanal)
+	Poruka (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Poruka (ID_Kanal) referencira _tekst (ID_Kanal)
+
+Datoteka (#ID_Dat, Naziv, Velicina, Tip, ID_Koris, Diskriminator, ID_Poruka)
+	Datoteka (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Datoteka (ID_Poruka) referencira Poruka (ID_Poruka)
+
+Institucija (#ID_Institucija, Naziv, ID_grad)
+	Institucija (ID_grad) referencira Grad (ID_grad)
+
+Kurs (#ID_Kurs, Naziv, ImePrezimeProf, ESPB, Semestar, ID_Institucija)
+	Kurs (ID_Institucija) referencira Institucija (ID_Institucija)
+
+Projekat (#ID_Projekat, Naziv, Trajanje, MxUcesnika, ID_Kurs)
+	Projekat (ID_Kurs) referencira Kurs (ID_Kurs)
+
+Korisnik (#ID_Koris, #Diskriminator, Username, Nickname, ID_Aktiv, ID_Igrica,ID_Poziv)
+	Korisnik (ID_Aktiv) referencira StanjeAktivnosti (ID_Aktiv)
+    Korisnik (ID_Igrica) referencira Igrica (ID_Igrica)
+    Korisnik (ID_Poziv) referencira Poziv (ID_Poziv)
+       
+Ucenik (Razred, #ID_Koris, #Diskriminator, ID_Institucija)
+	Ucenik (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Ucenik (ID_Institucija) referencira Institucija (ID_Institucija)
+Student(Godina, #ID_Koris, #Diskriminator, ID_Institucija)
+	Student (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Student (ID_Institucija) referencira Institucija (ID_Institucija)
+
+Srednja_Skola (Tip, #ID_Institucija)
+	Srednja_Skola (ID_Institucija) referencira Institucija (ID_Institucija)
+Visoka_Skola (Specijalizacija, #ID_Institucija)
+	Visoka_Skola (ID_Institucija) referencira Institucija (ID_Institucija)
+Fakultet (BrojGodina, #ID_Institucija)
+	Fakultet (ID_Institucija) referencira Institucija (ID_Institucija)
+	
+Reakcija (Emoji, Zakljucana, ID_Poruka, #ID_Koris, #Diskriminator)
+	Reakcija (ID_Poruka) referencira Poruka (ID_Poruka)
+	Reakcija (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+
+Spominjanje (Vidljivost, #ID_Koris, #Diskriminator)
+	Spominjanje (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+
+Ostvaruje (Vreme, #ID_Koris, #Diskriminator, #ID_Poziv)
+	Ostvaruje (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Ostvaruje (ID_Poziv) referencira Poziv (ID_Poziv)
+
+Korisnik_Projekat (#ID_Koris, #Diskriminator, #ID_Projekat) 
+	Korisnik_Projekat (ID_Projekat) referencira Projekat (ID_Projekat)
+	Korisnik_Projekat (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+
+Spominjanje_Poruka (#ID_Koris, #Diskriminator, #ID_Poruka)
+	Spominjanje_Poruka (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Spominjanje_Poruka (ID_Poruka) referencira Poruka (ID_Poruka)
+
+Korisnik_Dozvola (#ID_Koris, #Diskriminator, #ID_Dozvola)
+	Korisnik_Dozvola (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Korisnik_Dozvola (ID_Dozvola) referencira Dozvola (ID_Dozvola)
+
+Korisnik_Server (#ID_Koris, #Diskriminator, #ID_Server)
+    Korisnik_Server (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+    Korisnik_Server (ID_Server) referencira Server (ID_Server)
+     
+Pozivnica_Server (#ID_Koris, #Diskriminator, #ID_poziv)
+	Pozivnica_Server (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Pozivnica_Server (ID_poziv) referencira Pozivnica (ID_poziv)
+
+Korisnik_Pozivnica (#ID_Koris, #Diskriminator, #ID_Poziv)
+	Korisnik_Pozivnica (ID_Koris, Diskriminator) referencira Korisnik (ID_Koris, Diskriminator)
+	Korisnik_Pozivnica (ID_Poziv) referencira Pozivnica (ID_Poziv)
+
+
+	
+
+

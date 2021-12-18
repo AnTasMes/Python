@@ -1,0 +1,21 @@
+RADNIK (#RID, Ime, Prez)
+CLAN (#JMBG, Ime, Prez)
+ARTIKAL (#AID, Naziv, Cena)
+
+ZADUZIVANJE (#Dzad, #JMBG, #RID, #AID)
+ZADUZIVANJE (JMBG) ref na Clan(JMBG)
+ZADUZIVANJE(RID) ref na Radnik(RID)
+ZADUZIVANJ(AID) ref na Artikal(AID)
+
+FILM (#AID, Zanr)
+FILM(AID) ref na Artikal(AID)
+IGRA(#AID, GodIzd, IzdKuca)
+IGRA(AID) ref na Artikal(AID)
+
+PROIZVODJAC(#PIB, Naziv)
+TIP(#TID, Namena)
+
+UREDJAJ(#AID, Opis, PIB, TID)
+UREDJAJ(AID) ref na Artikal(AID)
+UREDJAJ(PIB) ref na Proizvodjac(PIB)
+UREDJAJ(TID) ref na Tip(TID)

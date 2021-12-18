@@ -1,0 +1,16 @@
+ODELJENJE (#SifraOD, Naziv, Grad)
+RADNI_STATUS (#SifraRS, NazivRS)
+OB_PROF (#SifraOP, NazivOP, StepenSS)
+
+RADNO_MESTO (#SifraRM, NazivRM, SifraOP)
+RADNO_MESTO(SifraOP) ref na OB_PROF(SifraOP)
+
+RADNIK (#SifraRAD, Ime, Prezime, MLB, DatumRodj, Pol, Plata, Premija, SifraOD, SifraOP, SifraRUK)
+RADNIK(SifraOP) ref na OB_PROF (SifraOP)
+RADNIK(SifraOD) ref na ODELJENJE(SifraOD)
+RADNIK(SifraRUK) ref na RADNIK(SifraRAD)
+
+ANGAZOVANJE (#DatOD,  #SifraRAD, #SifraRM, DatDo, SifraRS)
+ANGAZOVANJE (SifraRAD) ref na RADNIK(SifraRAD)
+ANGAZOVANJE (SifraRM) ref na RADNO_MESTO(SIfraRM)
+ANGAZOVANJE (SifraRS) ref na RADNI_STATUS(SifraRS)
