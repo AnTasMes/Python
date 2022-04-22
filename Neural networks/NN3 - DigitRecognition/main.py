@@ -13,7 +13,7 @@ def gen_image(arr: np.ndarray) -> plt:
     return plt
 
 
-def convolution(img: np.ndarray, filter_list: np.ndarray, activation: str = 'relu', padding: str = 'ValuePadding') -> np.ndarray:
+def convolution(img: np.ndarray, filter_list: np.ndarray, activation: str = 'relu', padding: str = 'SamePadding') -> np.ndarray:
     """
     Function convolution maps all chunks of an input, calculates their filters,
     and maps them into a feature_map for that layer
@@ -30,8 +30,8 @@ def convolution(img: np.ndarray, filter_list: np.ndarray, activation: str = 'rel
         String that defines which activation function will be used
     padding : str, optional
         String that defines if a padding will be used.
-        `ValuePadding` assures that the shape of feature maps will be the same as inputs.
-        `SamePadding` assures that the shape of feature maps will be `(img_w - filter_w + 1) x (img_h - filter_h + 1)`
+        `SamePadding` assures that the shape of feature maps will be the same as inputs.
+        `ValidPadding` assures that the shape of feature maps will be `(img_w - filter_w + 1) x (img_h - filter_h + 1)`
 
     Functions
     ---------
@@ -48,6 +48,9 @@ def convolution(img: np.ndarray, filter_list: np.ndarray, activation: str = 'rel
     >>> gen_image(features[:,:,0]).show()
 
     """
+    if padding == 'SamePadding':
+        img = np.pad(img, 1, mode='constant')
+
     feature_map = np.zeros((img.shape[0] - filter_list.shape[1] + 1,
                             img.shape[1] - filter_list.shape[2] + 1,
                             filter_list.shape[0]))
@@ -175,6 +178,7 @@ def pooling(f_map: np.ndarray, mode: str) -> np.ndarray:
             sys.exit()
         else:
             pool_map[:, :, m_num] = _pool(curr_map, mode, W, H)[:]
+    return pool_map
 
 
 def main():
@@ -208,7 +212,10 @@ def main():
 
     features = convolution(input, l1_filter)
 
-    pooling(features, mode='max')
+    pools = pooling(features, mode='max')
+
+    for p in range(pools.shape[-1]):
+        gen_image(pools[:, :, p]).show()
 
     # for i in range(features.shape[-1]):
     #     gen_image(features[:, :, i]).show()
