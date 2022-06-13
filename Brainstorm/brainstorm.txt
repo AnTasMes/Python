@@ -1,0 +1,2 @@
+ako svaku liniju tretiramo kao poseban objekat i svaka linija ima id bloka kom pripada
+

@@ -1,0 +1,9 @@
+fn function(x,y)
+{
+x = 2
+y = 3 +1
+x = 3
+}
+
+fn fn2(x){z=2
+}

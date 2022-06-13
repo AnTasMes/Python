@@ -1,8 +1,8 @@
 import sys
 import time
 import keyboard
-from Setting import Settings
-from Setting import SettingArrays
+#from Setting import Settings
+#from Setting import SettingArrays
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By

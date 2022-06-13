@@ -5,6 +5,7 @@ import numpy as np
 class Perceptron:
     def __init__(self, inputNo) -> None:
         self.synaptic_weights = 2 * np.random.random((inputNo, 1)) - 1
+        print(self.synaptic_weights)
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
@@ -33,6 +34,7 @@ class Perceptron:
             else:
                 adj = np.dot(training_input.T, error * ActivationFun.sigmoidDer(output))
             self.synaptic_weights += adj
+        print(f"SYNAPTIC WEIGHTS: \n{self.synaptic_weights}")
 
 
 if __name__ == "__main__":

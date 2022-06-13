@@ -1,0 +1,8 @@
+MATCH (person:Person) MERGE (person)-[r:A]->(per:Person {id: "123"})
+MATCH (person:Person {name:"Andrej"}) MERGE (person)-[r:A]->(per:Person)
+
+create (n:Person{name:"Ilija",id:"423"})
+
+match (p:Person{name:"Andrej"})-[r:SM]->() delete r
+
+match (p:Person{name:"Andrej"}),(b:Person) where p.relID = b.id or p.relID2 = b.id merge (p)-[r:VEZA {naziv: b.id}]->(b)

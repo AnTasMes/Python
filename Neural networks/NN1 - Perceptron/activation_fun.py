@@ -30,5 +30,5 @@ class ActivationFun:
 
 
 if __name__ == "__main__":
-    print(f"Result for tanh(20) : {ActivationFun.tanHyperbolic(x = 20)}")
+    print(f"Result for tanh(20) : {ActivationFun.tanHyperbolic(x = 10)}")
     print(f"Result for tanh(20)': {ActivationFun.tanHyperbolicDer(x = 20)}")
