@@ -1,0 +1,52 @@
+{
+  "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+  "stats" : [ {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620037050,
+    "state" : "NEW"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620537968,
+    "state" : "QUEUED_FOR_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620537968,
+    "state" : "PRE_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620537968,
+    "state" : "FILE_TO_TIFF_CONVERSION_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620540296,
+    "state" : "FILE_TO_TIFF_CONVERSION_FINISHED"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620540296,
+    "state" : "OCR_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620547342,
+    "state" : "OCR_FINISHED"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620547342,
+    "state" : "PRE_PROCESSING_FINISHED"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620547343,
+    "state" : "PIPELINE_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620633718,
+    "state" : "PIPELINE_FINISHED"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620633718,
+    "state" : "POST_PROCESSING"
+  }, {
+    "id" : "966d2563-6d9a-44ff-b42b-3d9c208defcb",
+    "utcTimeStamp" : 1608620634631,
+    "state" : "DOCUMENT_PROCESSED"
+  } ]
+}
