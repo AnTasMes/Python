@@ -1,3 +1,6 @@
+
+from re import match
+import sys
 import json
 import pyspark.sql.functions as F
 
@@ -46,7 +49,7 @@ def calculate_duration_between(df: DataFrame, start: str, end: str):
 
     Parameters:
     -----------
-    df: DataFrame 
+    df: DataFrame
         DataFrame to be calculated
     start: str
         Starting processing step
@@ -117,8 +120,30 @@ def calculate(df: DataFrame, spark: SparkSession) -> DataFrame:
     return diff_df
 
 
+def switch(args: list[str], df: DataFrame, spark: SparkSession) -> tuple[DataFrame, DataFrame]:
+    """
+    Returns calculated values based on arguments given in terminal
+    """
+    basic_df = None
+    diff_df = None
+
+    match args:
+        case [_, 'basic']:
+            basic_df = calculate(df, spark)
+        case [_, 'diff', proc1, proc2]:
+            diff_df = calculate_duration_between(df, proc1, proc2)
+        case [_, 'all', *vals]:
+            diff_df = calculate_duration_between(df, proc1, proc2)
+            basic_df = calculate(df, spark)
+        case _:
+            print(
+                'Missing correct arguments => basic, diff <proc1> <proc2>, all <proc1> <proc2>')
+
+    return basic_df, diff_df
+
+
 def main():
-    json_data = './Data Engineering/metrics/*.json'
+    json_data = './metrics/*.json'
     spark = buildSession()
 
     # loads data from all json files
@@ -127,15 +152,13 @@ def main():
     # unpacks the data from the array of stats
     stats_df = unpack(many_df, spark)
 
-    # calculates required stats
-    glob_df = calculate(stats_df, spark)
+    # gets values based on terminal arguments
+    basic_df, diff_df = switch(sys.argv, stats_df, spark)
 
-    # calculates time difference between two processing steps
-    difference_df = calculate_duration_between(
-        stats_df, 'PRE_PROCESSING', 'PIPELINE_FINISHED')
-
-    glob_df.show()
-    difference_df.show()
+    if basic_df:
+        basic_df.show()
+    if diff_df:
+        diff_df.show()
 
 
 if __name__ == '__main__':
