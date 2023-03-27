@@ -43,7 +43,7 @@ class Perceptron:
         self.Output_Nodes = output_nodes
         self.Hidden_Layers = hidden_layers
 
-        self.Learning_Rate = 0.1
+        self.Learning_Rate = 0.01
 
         self.Synaptic_Weights = []
         self.Bias = []
@@ -108,10 +108,13 @@ class Perceptron:
         for i in range(len(self.Synaptic_Weights)):
             if vb:
                 print(f'INPUTS PRE: ', inputs.shape)
+
             inputs = faf.Activation(prefix=self.f_list[i]).function(
                 np.dot(self.Synaptic_Weights[i], inputs) + self.Bias[i])
+            
             if vb:
                 print(f'INPUTS POST: ', inputs.shape)
+                
             Outputs.append(inputs)
 
         return Outputs
@@ -186,6 +189,7 @@ class Perceptron:
         for i in range(iter):
             if i % 100 == 0:
                 print(f"Training iteration {i = }")
+
             index = np.random.randint(0, len(inputs))
 
             # makes parameter data transposed

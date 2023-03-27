@@ -1,6 +1,11 @@
-from mnist import MNIST as mn
+
+import os
+
+import matplotlib
 from flex_a_fun import Activation
 from Perceptron_FILE import Perceptron
+
+from mnist.loader import MNIST as mn
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,21 +25,30 @@ class CNN:
 
     def prepare_data(self, count: int):
         data = []
+        print('Preparing data...')
         for cnt in range(count):
-            print(f'IMAGE: {cnt+1}')
+            # print(f'IMAGE: {cnt+1}')
             image = np.reshape(self.input[cnt], (28, 28))
-            input = np.zeros((image.shape[0], image.shape[1], 2))
+            input = np.zeros((image.shape[0], image.shape[1], 1))
 
             input[:, :, 0] = image[:]
+
+            input = input / 255
+
             features = self.convolution(
                 input, self.filter_list, self.activation, self.padding)
             pooling = self.pooling(features, self.p_mode)
 
-            features = self.convolution(
-                features, self.filter_list, self.activation, self.padding)
-            pooling = self.pooling(features, 'avg')
+            #CNN.gen_image(pooling[:, :, 0]).show()
+
+            # features = self.convolution(
+            #     pooling, self.filter_list, self.activation, self.padding)
+            # pooling = self.pooling(features, self.p_mode)
 
             data.append(pooling.flatten())
+
+        print('Data prepared!')
+
         return data
 
     @staticmethod
@@ -78,30 +92,37 @@ class CNN:
         >>> gen_image(features[:,:,0]).show()
 
         """
+        
         if padding == 'SamePadding':
             npad = ((1, 1), (1, 1), (0, 0))
             img = np.pad(img, npad, mode='constant')
 
         feature_map = np.zeros((img.shape[0] - filter_list.shape[1] + 1,
                                 img.shape[1] - filter_list.shape[2] + 1,
-                                filter_list.shape[0]))
+                                filter_list.shape[0] * img.shape[-1]))
 
-        for f_num, f in enumerate(filter_list):
-            #print(f'Calculating for filter No. {f_num+1}')
-            curr_filter = f
-            if curr_filter.shape[0] != filter_list.shape[1] or curr_filter.shape[1] != filter_list.shape[2]:
-                print(
-                    f'Error: Filter doesnt match the shape of a filter list => {curr_filter.shape} : ({filter_list.shape[1:]})')
-            if curr_filter.shape[0] % 2 == 0 or curr_filter.shape[1] % 2 == 0:
-                print('Error: Filters must be an odd dimensional matrix')
-                sys.exit()
-            else:
-                # adds results to a feature map of that layer
-                feature_map[:, :, f_num] = self._conv(img, curr_filter)[:]
+        for i_num, i in enumerate(img.T):
+            for f_num, f in enumerate(filter_list):
 
-                # calculates the activation
-                feature_map[:, :, f_num] = Activation(
-                    prefix=activation).function(feature_map[:, :, f_num])
+                index = f_num + (i_num * filter_list.shape[0])
+
+                curr_filter = f
+                if curr_filter.shape[0] != filter_list.shape[1] or curr_filter.shape[1] != filter_list.shape[2]:
+                    print(
+                        f'Error: Filter doesnt match the shape of a filter list => {curr_filter.shape} : ({filter_list.shape[1:]})')
+                if curr_filter.shape[0] % 2 == 0 or curr_filter.shape[1] % 2 == 0:
+                    print('Error: Filters must be an odd dimensional matrix')
+                    sys.exit()
+                else:
+                    # adds results to a feature map of that layer
+
+                    feature_map[:, :, index] = self._conv(i, curr_filter)[:]
+
+                    # calculates the activation
+                    feature_map[:, :, index] = Activation(
+                        prefix=activation).function(feature_map[:, :, index])
+                
+            # CNN.gen_image(feature_map[:, :, f_num]).show()
 
         return feature_map
 
@@ -132,9 +153,14 @@ class CNN:
             for j in range(start_range, stop_range):
                 # separates each chunk by a filter
                 chunk = img[i-coord_shift:i-coord_shift+cr_f.shape[0],
-                            j-coord_shift:j-coord_shift+cr_f.shape[0], 0]
+                            j-coord_shift:j-coord_shift+cr_f.shape[0]]
+                
+                # aproximate between 0 and 1
+                #chunk = chunk / 255
+
                 # adds a result of a sum and multiplication with the filter to a result array
                 result[i-1][j-1] = np.sum(chunk * cr_f)
+
         return result
 
     def _pool(self, cr_f_m: np.ndarray, mode: str, W: int, H: int) -> np.ndarray:
@@ -209,12 +235,17 @@ class CNN:
 
 
 def main():
-    mndata = mn('samples')
+
+    mndata = mn(path=os.path.join(os.getcwd(), 'NN3 - DigitRecognition\samples'), return_type='numpy')
+
+    # print(os.path.join(os.getcwd(), 'samples'))
 
     images, labels = mndata.load_training()
 
-    print(len(images[0]))
-    image = np.reshape(images[1], (28, 28))
+    print(len(images[1]))
+    
+    image = np.reshape(images[0], (28, 28))
+
     input = np.zeros((image.shape[0], image.shape[1], 1))
     # input = np.zeros((image.shape[0], image.shape[1], channel_size))
 
@@ -244,37 +275,55 @@ def main():
         [0, 0, 0],
         [1, 1, 1]]])
     # data = np.array([CNN(input, l1_filter, 'relu').data])
-
+    
+    train_image_count = 250
     training_output = []
     #CNN.gen_image(input[:, :, 0]).show()
     # print(output[0])
-    for i in range(10):
+    for i in range(train_image_count):
         output = [0 for i in range(10)]
         output[labels[i]] = 1
         training_output.append(output)
 
-    # print(training_output)
+        # like this you print the output and show the resulting image
+        # image = np.reshape(images[i], (28, 28))
+        # input[:, :, 0] = image[:]
+        # CNN.gen_image(input[:, :, 0]).show()
+        # print("Label: ", labels[i], "Output: ", output)
 
-    training_input = np.array(CNN(images, l1_filter, count=10).data)
+
+    training_input = np.array(CNN(images, l1_filter, count=train_image_count, activation='relu').data)
     training_output = np.array(training_output)
-    # print(training_input[0])
+    print(training_input.shape)
 
     activation_dict = {
         '0': 'sigmoid',
         '1': 'sigmoid',
         '2': 'sigmoid'
     }
-    # print(training_input[0].shape)
-    # print(training_input[0])
 
     perc = Perceptron(training_input.shape[1], [
-                      training_input.shape[1]//2, training_input.shape[1]//2], 10, fun=activation_dict)
-    # print('TI: ', training_input.shape)
-    # print('SW: ', perc.Synaptic_Weights[2].shape)
-    perc.Train(training_input, training_output, 20000)
-    res = perc.FeedForwardFlex(np.array([training_input[1]]).T, vb=1)
-    CNN.gen_image(input[:, :, 0]).show()
-    print(res[-1])
+                      training_input.shape[1]//2, training_input.shape[1]//2, training_input.shape[1]//3], 10, fun=activation_dict, base_fun='sigmoid')
+
+    images_te, labels_te = mndata.load_testing()
+    testing_input = np.array(CNN(images_te, l1_filter, count=100, activation='relu').data)
+
+    perc.Train(training_input, training_output, 5000)
+    hits = 0
+    for i in range(100):
+        res = perc.FeedForwardFlex(np.array([testing_input[i]]).T, vb=0)
+        val = [int(i) for i in (res[-1] == np.max(res[-1]))]
+        
+        if val.index(1) == labels_te[i]:
+            hits += 1
+        else:
+            print("Label: ", labels_te[i], "Output: ", val.index(1))
+
+        
+    print("Accuracy: ")
+    print(hits/100)
+
+
     # print(data)
     # features = convolution(input, l1_filter)
     # pools = pooling(features, mode='max')

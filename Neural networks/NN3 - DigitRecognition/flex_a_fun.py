@@ -1,6 +1,6 @@
 from abc import abstractclassmethod
 import numpy as np
-
+import sys
 
 class Activation():
     _repository = {}
@@ -45,9 +45,15 @@ class Hyperbolic(Activation, prefix='htan'):
 
 class ReLU(Activation, prefix='relu'):
     def function(self, x):
-        x[x <= 0] = 0
-        x[x > 0] = x[x > 0]
-        return x
+        return np.maximum(0, x)
 
     def derivative(self, x):
         return 1 * (x > 0)
+
+
+class Tan(Activation, prefix='tan'):
+    def function(self, x):
+        return np.tan(x)
+
+    def derivative(self, x):
+        return 1 / np.power(np.cos(x), 2)

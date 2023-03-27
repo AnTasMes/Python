@@ -28,7 +28,6 @@ class ActivationFun:
             np.power(np.exp(x) - np.exp(-x), 2) / np.power(np.exp(x) + np.exp(-x), 2)
         )
 
-
 if __name__ == "__main__":
     print(f"Result for tanh(20) : {ActivationFun.tanHyperbolic(x = 20)}")
     print(f"Result for tanh(20)': {ActivationFun.tanHyperbolicDer(x = 20)}")
