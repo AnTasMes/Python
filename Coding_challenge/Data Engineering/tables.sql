@@ -110,3 +110,49 @@ FROM (
 ) AS #
 WHERE 
     rownumber = 3
+
+SELECT 
+    *
+FROM (
+    SELECT  
+        DENSE_RANK() OVER(ORDER BY emp.salary DESC) as d_rank,
+        emp.employee_id,
+        emp.employee_name,
+        emp.salary,
+        div.division_name,
+        div.division_region,
+        mngr.employee_name as mngr_name
+    FROM Employee emp
+    JOIN Division div 
+        ON div.division_id = emp.division_id
+    JOIN Employee mngr
+        ON mngr.employee_id = emp.manager_id
+    WHERE 
+        emp.employee_id IS NOT NULL
+) AS #
+WHERE 
+    d_rank = 3
+
+WITH Rank_ID(id, d_rank) AS (
+    SELECT 
+        e.employee_id as id,
+        DENSE_RANK() OVER(ORDER BY e.salary DESC) as d_rank
+    FROM 
+        Employee e
+    WHERE e.manager_id is not null
+)
+SELECT
+    emp.employee_id,
+    emp.employee_name,
+    emp.salary,
+    div.division_name,
+    div.division_region,
+    mngr.employee_name as mngr_name
+FROM Employee emp
+JOIN Rank_ID rid on rid.id = emp.employee_id
+JOIN Division div on div.division_id = emp.division_id 
+JOIN Employee mngr on mngr.employee_id = emp.manager_id
+WHERE 
+    rid.d_rank = 3
+
+SELECT * From Employee

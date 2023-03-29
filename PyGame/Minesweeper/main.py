@@ -210,9 +210,6 @@ def main():
                     mines_positions, flag_positions, cover_field)
                 if victory:
                     print("YOU WON!!!!!")
-                # os.system('cls')
-                #print(field, end='\n\n')
-                # print(cover_field)
 
         draw(win, field, cover_field, flag_positions)
 

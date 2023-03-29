@@ -276,7 +276,7 @@ def main():
         [1, 1, 1]]])
     # data = np.array([CNN(input, l1_filter, 'relu').data])
     
-    train_image_count = 250
+    train_image_count = 500
     training_output = []
     #CNN.gen_image(input[:, :, 0]).show()
     # print(output[0])
@@ -306,11 +306,13 @@ def main():
                       training_input.shape[1]//2, training_input.shape[1]//2, training_input.shape[1]//3], 10, fun=activation_dict, base_fun='sigmoid')
 
     images_te, labels_te = mndata.load_testing()
-    testing_input = np.array(CNN(images_te, l1_filter, count=100, activation='relu').data)
+    testing_input = np.array(CNN(images_te, l1_filter, count=200, activation='relu').data)
 
-    perc.Train(training_input, training_output, 5000)
+    perc.Train(training_input, training_output, 10000)
     hits = 0
-    for i in range(100):
+
+    testing_sample = 198
+    for i in range(testing_sample):
         res = perc.FeedForwardFlex(np.array([testing_input[i]]).T, vb=0)
         val = [int(i) for i in (res[-1] == np.max(res[-1]))]
         
@@ -321,7 +323,7 @@ def main():
 
         
     print("Accuracy: ")
-    print(hits/100)
+    print(hits/testing_sample)
 
 
     # print(data)

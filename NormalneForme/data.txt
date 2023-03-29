@@ -1,0 +1,8 @@
+Angazman (SifZap, SifRM, DatOd, Ime, NazivRM, SifOdelj, NazivOdelj)
+1) SifZap, SifRM, DatOd --> Ime, NazivRM, SifOdelj, NazivOdelj
+2) SifZap --> Ime
+3) SifZap --> SifOdelj
+4) SifRM --> NazivRM
+5) SifOdelj --> NazivOdelj
+6) NazivRM --> SifRM
+7) SifZap, NazivRM, DatOd --> Ime, SifRM, SifOdelj, NazivOdelj
