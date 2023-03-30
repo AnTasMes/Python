@@ -15,6 +15,42 @@ import sys
 
 import selenium_init as si
 
+from settings import Settings, load_settings
+
+SETTINGS_FILE = './settings.json'
+SETTINGS = load_settings(SETTINGS_FILE)
+
+STARTING_URL = SETTINGS.starting_url
+INPUT_FILE = SETTINGS.input_file_path
+OUTPUT_FILE = SETTINGS.output_file_path
+NUMBER_OF_THREADS = SETTINGS.thread_count
+
+import datetime
+
+
+def main():
+    print('Starting the program...')
+    
+    start_time = datetime.datetime.now()
+
+    # Prepare the dataframe
+    df = prepare_dataframe(INPUT_FILE)
+
+    df = loop_through_dataframe_with_threads(df)
+    #df = loop_through_dataframe_single(df, si.start(STARTING_URL, 5))
+
+    print("Exporting to Excel once again...")
+    df.to_excel(OUTPUT_FILE)
+
+    print("Exported.")
+
+    end_time = datetime.datetime.now()
+
+    print('Start time: ', start_time, ' | End time: ', end_time, ' | Lasted: ', end_time - start_time )
+
+    print("Closing application...")
+    sys.exit(0)
+
 
 def load_data(file_path: str) -> pd.DataFrame:
     df = pd.read_excel(file_path)
@@ -43,7 +79,7 @@ def load_first_section(rsid_1: str, rsid_2: str, driver):
      # Find the textbox with id = 'se_q'
     textbox = None
     counter = 0
-    while textbox is None and counter < TIME_FOR_PAGE_TO_LOAD + 20:
+    while textbox is None and counter < SETTINGS.page_load_seconds + 20:
         try:
             textbox = driver.find_element(By.ID,'se_q')
         except:
@@ -67,7 +103,7 @@ def load_first_section(rsid_1: str, rsid_2: str, driver):
     # Find the link that contains the (Human Variant) text (Possible long wait)
     link = None
     counter = 0
-    while link is None and counter < TIME_FOR_PAGE_TO_LOAD + 20:
+    while link is None and counter < SETTINGS.page_load_seconds + 20:
         try:
             link = driver.find_element(By.XPATH, "//a[contains(text(), '(Human Variant)')]")
         except:
@@ -90,7 +126,7 @@ def load_first_section(rsid_1: str, rsid_2: str, driver):
     # Find the link that contains the (HighLD) href
     link = None
     counter = 0
-    while link is None and counter < TIME_FOR_PAGE_TO_LOAD + 20:
+    while link is None and counter < SETTINGS.page_load_seconds + 20:
         try:
             link = driver.find_element(By.XPATH, "//a[contains(@href, 'HighLD')]")
         except:
@@ -116,7 +152,7 @@ def get_value(rsid_1: str, rsid_2: str, driver, skip: bool) -> float:
     # Find the textbox with id = 'variant'
     textbox = None 
     counter = 0
-    while textbox is None and counter < TIME_FOR_PAGE_TO_LOAD + 20:
+    while textbox is None and counter < SETTINGS.page_load_seconds + 20:
         try:
             textbox = driver.find_element(By.ID, 'variant')
         except:
@@ -139,7 +175,7 @@ def get_value(rsid_1: str, rsid_2: str, driver, skip: bool) -> float:
     # Find the r^2 value in the row with Description that contains 'Utah residents with Northern and... ' text
     r2_value = None
     counter = 0
-    while r2_value is None and counter < TIME_FOR_PAGE_TO_LOAD + 25:
+    while r2_value is None and counter < SETTINGS.page_load_seconds + 25:
         try:
             # Table also has a column with the text 'Focus Variant' and 'Utah residents with Northern and... '
             # We need to find the row that has the text 'Utah residents with Northern and... '
@@ -186,18 +222,17 @@ def loop_through_dataframe_single(df: pd.DataFrame, driver) -> pd.DataFrame:
     return df
 
 def loop_through_dataframe_with_threads(df: pd.DataFrame) -> pd.DataFrame:
-    number_of_threads = NUMBER_OF_THREADS
-    print('Looping through the dataframe with ' + str(number_of_threads) + ' threads...')
+    print('Looping through the dataframe with ' + str(NUMBER_OF_THREADS) + ' threads...')
 
     # Create a list of threads
     threads = []
     drivers = []
     try:
-        for i in range(number_of_threads):
+        for i in range(NUMBER_OF_THREADS):
             LOGGER.setLevel(logging.WARNING)
             driver = si.start(STARTING_URL, 5)
             drivers.append(driver)
-            threads.append(Thread(target=loop_through_dataframe, args=(df, drivers[i], i, number_of_threads)))
+            threads.append(Thread(target=loop_through_dataframe, args=(df, drivers[i], i)))
             threads[i].start()
     except:
         print('Thread creation failed.')
@@ -215,22 +250,22 @@ def loop_through_dataframe_with_threads(df: pd.DataFrame) -> pd.DataFrame:
         driver.close()
 
 
-    print('Looping through the dataframe with ' + str(number_of_threads) + ' threads finished.')
+    print('Looping through the dataframe with ' + str(NUMBER_OF_THREADS) + ' threads finished.')
 
     return df
 
-def loop_through_dataframe(df: pd.DataFrame, driver, thread_number, number_of_threads) -> pd.DataFrame:
+def loop_through_dataframe(df: pd.DataFrame, driver, thread_number) -> pd.DataFrame:
     print('Looping through the dataframe with thread number: ' + str(thread_number) + '...')
 
     number_of_rows = len(df.index)
     print('Number of rows: ' + str(number_of_rows))
 
     # Calculate the start and end index for the thread
-    start_index = int(thread_number * number_of_rows / number_of_threads)
-    end_index = int((thread_number + 1) * number_of_rows / number_of_threads)
+    start_index = int(thread_number * number_of_rows / NUMBER_OF_THREADS)
+    end_index = int((thread_number + 1) * number_of_rows / NUMBER_OF_THREADS)
 
     # If the thread is the last thread, then set the end index to the last row
-    if thread_number == number_of_threads - 1:
+    if thread_number == NUMBER_OF_THREADS - 1:
         end_index = number_of_rows
 
     print('Thread number: ' + str(thread_number) + ' will loop from row: ' + str(start_index) + ' to row: ' + str(end_index))
@@ -264,7 +299,7 @@ def loop_through_dataframe(df: pd.DataFrame, driver, thread_number, number_of_th
             # Fail safe
             df.to_excel(OUTPUT_FILE)   
         
-        print("THREAD #{thread_number} -> Progress: " + str(round((df.index.get_loc(index) + 1) / number_of_rows * 100, 2)) + " %" + " -> Finished row: " + index)
+        print(f"THREAD #{thread_number} -> Progress: " + str(round((df.index.get_loc(index) + 1) / number_of_rows * 100, 2)) + " %" + " -> Finished row: " + index)
         
 
 
@@ -281,35 +316,10 @@ def loop_through_dataframe(df: pd.DataFrame, driver, thread_number, number_of_th
 # Next page: https://www.ensembl.org/Homo_sapiens/Variation/Explore?r=2:174751073-174752073;v=rs74803262;vdb=variation;vf=195784804
 # https://www.ensembl.org/Homo_sapiens/Variation/HighLD?db=core;r=2:174751073-174752073;v=rs74803262;vdb=variation;vf=195784804
 
-
-STARTING_URL = 'https://www.ensembl.org/index.html'
-INPUT_FILE = './input/rsid_values.xlsx'
-OUTPUT_FILE = './output/output_threading_full.xlsx'
-TIME_FOR_PAGE_TO_LOAD = 10
-NUMBER_OF_THREADS = 6
-
-import datetime
-
 if __name__ == '__main__':
-    print('Starting the program...')
-    
-    start_time = datetime.datetime.now()
+    main()
 
-    # Prepare the dataframe
-    df = prepare_dataframe(INPUT_FILE)
 
-    df = loop_through_dataframe_with_threads(df)
-    #df = loop_through_dataframe_single(df, si.start(STARTING_URL, 5))
 
-    print("Exporting to Excel once again...")
-    df.to_excel(OUTPUT_FILE)
-
-    print("Exported.")
-
-    end_time = datetime.datetime.now()
-
-    print('Start time: ', start_time, ' | End time: ', end_time, ' | Lasted: ', end_time - start_time )
-
-    print("Closing application...")
 
 
