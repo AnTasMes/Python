@@ -24,6 +24,7 @@ STARTING_URL = SETTINGS.starting_url
 INPUT_FILE = SETTINGS.input_file_path
 OUTPUT_FILE = SETTINGS.output_file_path
 NUMBER_OF_THREADS = SETTINGS.thread_count
+OPTIONS = SETTINGS.options
 
 import datetime
 
@@ -230,7 +231,7 @@ def loop_through_dataframe_with_threads(df: pd.DataFrame) -> pd.DataFrame:
     try:
         for i in range(NUMBER_OF_THREADS):
             LOGGER.setLevel(logging.WARNING)
-            driver = si.start(STARTING_URL, 5)
+            driver = si.start(STARTING_URL, OPTIONS, 5)
             drivers.append(driver)
             threads.append(Thread(target=loop_through_dataframe, args=(df, drivers[i], i)))
             threads[i].start()

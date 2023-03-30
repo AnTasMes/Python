@@ -10,19 +10,20 @@ from selenium.webdriver.remote.remote_connection import LOGGER
 
 import logging
 
-
-
 OPTIONS = webdriver.EdgeOptions()
 
-OPTIONS.add_argument('--headless')
-OPTIONS.add_argument("--disable-crash-reporter")
-OPTIONS.add_argument("--disable-in-process-stack-traces")
-OPTIONS.add_argument("--disable-logging")
-OPTIONS.add_argument("--disable-dev-shm-usage")
-OPTIONS.add_argument("--log-level=3")
-OPTIONS.add_argument("--output=/dev/null")
+# OPTIONS.add_argument("--headless")
+# OPTIONS.add_argument("--disable-crash-reporter")
+# OPTIONS.add_argument("--disable-in-process-stack-traces")
+# OPTIONS.add_argument("--disable-logging")
+# OPTIONS.add_argument("--disable-dev-shm-usage")
+# OPTIONS.add_argument("--log-level=3")
+# OPTIONS.add_argument("--output=/dev/null")
 
-def start(url: str, load_time: int):
+def start(url: str, options: list = None, load_time: int = 1):
+
+    load_options(options)
+
     try:
         LOGGER.setLevel(logging.WARNING)
         driver = webdriver.Edge(options=OPTIONS)
@@ -32,3 +33,7 @@ def start(url: str, load_time: int):
         print(e)
         sys.exit()
     return driver
+
+def load_options(options: list):
+    for option in options:
+        OPTIONS.add_argument(option)

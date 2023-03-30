@@ -8,6 +8,7 @@ class Settings:
     input_file_path: str = './input/rsid_values.xlsx'
     output_file_path: str = './output/output.xlsx'
     starting_url: str = 'https://www.ensembl.org/index.html'
+    options: list = None
 
 def load_settings(input_file_path: str = None):
     return Settings(**load_settings_from_file(input_file_path))
