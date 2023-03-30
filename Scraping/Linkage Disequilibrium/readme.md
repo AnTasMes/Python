@@ -17,4 +17,18 @@ Use `settings.json` to define settings of the app.
 
 Whole process is **headless**.
 
+### WebDriver
+
+In order for Selenium to work, a WebDriver is required. As this program uses Edge as the main browser, Edge WebDriver of sufficient version must be downloaded.
+
+Edge WebDriver download link: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+
+### Dependencies
+
+Required modules are (install with `pip install`):
+
+- selenium
+- openpyxl
+- pandas
+
 Start the app by starting `main.py`.
