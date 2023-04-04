@@ -25,6 +25,7 @@ INPUT_FILE = SETTINGS.input_file_path
 OUTPUT_FILE = SETTINGS.output_file_path
 NUMBER_OF_THREADS = SETTINGS.thread_count
 OPTIONS = SETTINGS.options
+POPULATION = SETTINGS.population
 
 import datetime
 
@@ -187,7 +188,7 @@ def get_value(rsid_1: str, rsid_2: str, driver, skip: bool) -> float:
             table = Focus_Variant.find_element(By.XPATH, "./ancestor::table")
 
             # Find the row that has the text 'Utah residents with Northern and... '
-            row = table.find_element(By.XPATH, "//td[contains(text(), 'Utah residents with Northern')]/ancestor::tr")
+            row = table.find_element(By.XPATH, f"//td[contains(text(), '{POPULATION}')]/ancestor::tr")
 
             # Find the r^2 value in the same row
             r2_value = row.find_element(By.XPATH, "./td[6]").text
