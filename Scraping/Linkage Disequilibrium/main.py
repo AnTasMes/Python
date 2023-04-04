@@ -12,6 +12,7 @@ from threading import Thread
 import pandas as pd
 import time
 import sys
+import os
 
 import selenium_init as si
 
@@ -38,6 +39,9 @@ def main():
     # Prepare the dataframe
     df = prepare_dataframe(INPUT_FILE)
 
+    # Validate the output file name and make sure it doesn't exist
+    OUTPUT_FILE = validate_file_name(OUTPUT_FILE)
+
     df = loop_through_dataframe_with_threads(df)
 
     print("Exporting to Excel once again...")
@@ -52,6 +56,23 @@ def main():
     print("Closing application...")
     sys.exit(0)
 
+def validate_file_name(file_name: str) -> str:
+    # Check if the file name ends with .xlsx
+    file_name = attach_extension(file_name, '.xlsx')
+    
+    # Check if file exists
+    counter = 1
+    while os.path.exists(file_name):
+        file_name = file_name.replace('.xlsx', '') + '_' + str(counter) + '.xlsx'
+        counter += 1
+
+    return file_name
+
+def attach_extension(file_name: str, extension: str) -> str:
+    if not file_name.endswith(extension):
+        file_name += extension
+    return file_name
+
 
 def load_data(file_path: str) -> pd.DataFrame:
     df = pd.read_excel(file_path)
@@ -59,6 +80,8 @@ def load_data(file_path: str) -> pd.DataFrame:
 
 def prepare_dataframe(input_file: str) -> pd.DataFrame:
     print('Preparing the dataframe...')
+
+    input_file = attach_extension(input_file, '.xlsx')
     
     # Load the data
     df = load_data(input_file)
