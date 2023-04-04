@@ -39,7 +39,6 @@ def main():
     df = prepare_dataframe(INPUT_FILE)
 
     df = loop_through_dataframe_with_threads(df)
-    #df = loop_through_dataframe_single(df, si.start(STARTING_URL, 5))
 
     print("Exporting to Excel once again...")
     df.to_excel(OUTPUT_FILE)
@@ -204,24 +203,6 @@ def get_value(rsid_1: str, rsid_2: str, driver, skip: bool) -> float:
 
     return r2_value
 
-
-def loop_through_dataframe_single(df: pd.DataFrame, driver) -> pd.DataFrame:
-    print('Looping through the dataframe...')
-    for index in df.index:
-        for column in df.columns:   
-            if index == column:
-                print('The index and column are the same. Setting the value to 1.0')
-                df[index][column] = 1.0
-            else:
-                print('Getting the value for ' + index + ' and ' + column)
-                df[index][column] = get_value(index, column, driver)
-            
-            # Fail safe
-            df.to_excel(OUTPUT_FILE)   
-
-    print('Looping through the dataframe finished.')
-
-    return df
 
 def loop_through_dataframe_with_threads(df: pd.DataFrame) -> pd.DataFrame:
     print('Looping through the dataframe with ' + str(NUMBER_OF_THREADS) + ' threads...')
