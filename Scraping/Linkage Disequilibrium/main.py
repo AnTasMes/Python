@@ -40,7 +40,7 @@ def main():
     df = prepare_dataframe(INPUT_FILE)
 
     # Validate the output file name and make sure it doesn't exist
-    OUTPUT_FILE = validate_file_name(OUTPUT_FILE)
+    #OUTPUT_FILE = validate_file_name(OUTPUT_FILE)
 
     df = loop_through_dataframe_with_threads(df)
 

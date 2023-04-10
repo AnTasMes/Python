@@ -1,5 +1,5 @@
 {
-    "thread_count": 4,
+    "thread_count": 1,
     "page_load_seconds": 30,
     "input_file_path": "./input/rsid_values__.xlsx",
     "output_file_path": "./output/output_toscani.xlsx",
