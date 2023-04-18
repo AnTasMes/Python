@@ -5,7 +5,7 @@ import numpy as np
 
 
 class Perceptron:
-    def __init__(self, input_nodes: int, hidden_layers: list, output_nodes: int, fun: dict = None, base_fun: str = 'sigmoid') -> None:
+    def __init__(self, fun: dict = None, base_fun: str = 'sigmoid') -> None:
         """
         Init for a multilayer perceptron
 
@@ -39,38 +39,73 @@ class Perceptron:
         self.Funcions = fun
         self.base_function = base_fun
 
+        self.build = False
+
+
+    def setLayers(self, input_nodes: int, hidden_layers: list, output_nodes: int):
+        """"""
+
         self.Input_Nodes = input_nodes
         self.Output_Nodes = output_nodes
         self.Hidden_Layers = hidden_layers
 
-        self.Learning_Rate = 0.01
-
-        self.Synaptic_Weights = []
-        self.Bias = []
-
         # Putting all layers into one list
         self.Layers = [input_nodes]
+
         for i in hidden_layers:
             self.Layers.append(i)
+
         self.Layers.append(output_nodes)
 
-        for i in range(len(self.Layers)-1):
-            # adding synaptic weights
-            self.Synaptic_Weights.append(
-                2 * np.random.random([self.Layers[i+1], self.Layers[i]]) - 1)
-            # adding bias
-            self.Bias.append(2 * np.random.random([self.Layers[i+1], 1]) - 1)
+        return self
 
-        # finally adding functions to the network
-        self.AddFunctions()
+    def setWeights(self, weights = []):
+        """"""
 
-    def AddFunctions(self):
-        self.f_list = [self.base_function for i in self.Synaptic_Weights]
+        self.Synaptic_Weights = weights
+
+        # if no weights are given, then the weights are randomly generated
+        if weights == []:
+            for i in range(len(self.Layers)-1):
+                # adding synaptic weights (limit from -1 to 1)
+                self.Synaptic_Weights.append(
+                    2 * np.random.random([self.Layers[i+1], self.Layers[i]]) - 1)
+
+        return self
+
+    def setBias(self, bias = []):
+        """"""
+
+        self.Bias = bias
+
+        # if no bias is given, then the bias is randomly generated
+        if bias == []:
+            for i in range(len(self.Layers)-1):
+                # adding bias (limit from -1 to 1)
+                self.Bias.append(2 * np.random.random([self.Layers[i+1], 1]) - 1)
+
+        return self
+    
+    def setLearningRate(self, lr: float):
+        """"""
+
+        self.Learning_Rate = lr
+
+        return self
+
+    def build_me(self):
+        try:
+            self.f_list = [self.base_function for i in self.Synaptic_Weights]
+        except:
+            print('ERROR: No weights set')
+            
 
         # adds wanted functions to the list for later use
         if self.Funcions:
             for key, elem in self.Funcions.items():
                 self.f_list[int(key)] = elem
+        
+        return self
 
     def FeedForward(self, inputs: np.ndarray):
         """
@@ -128,6 +163,9 @@ class Perceptron:
             # calculating gradient
             grad = af.sigmoidDer(guesses[i]) * errors[-1] * self.Learning_Rate
 
+            # Limit gradient to 1
+            grad = np.clip(grad, -1, 1)
+            
             # adding to bias
             self.Bias[i] += grad
 
@@ -150,7 +188,7 @@ class Perceptron:
             # calculating gradient
             grad = faf.Activation(prefix=self.f_list[i]).derivative(
                 guesses[i]) * errors[-1] * self.Learning_Rate
-
+            
             # adding to bias
             self.Bias[i] += grad
 
@@ -188,7 +226,7 @@ class Perceptron:
         """
         for i in range(iter):
             if i % 100 == 0:
-                print(f"Training iteration {i = }")
+                print(f"Training iteration: {i}")
 
             index = np.random.randint(0, len(inputs))
 

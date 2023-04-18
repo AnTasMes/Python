@@ -42,13 +42,19 @@ class Hyperbolic(Activation, prefix='htan'):
             np.power(np.exp(x) + np.exp(-x), 2)
         )
 
+class LReLU(Activation, prefix='lrelu'):
+    def function(self, x):
+        return np.where(x > 0, x, x * 0.01)
+
+    def derivative(self, x):
+        return np.where(x > 0, 1, 0.01)
 
 class ReLU(Activation, prefix='relu'):
     def function(self, x):
         return np.maximum(0, x)
 
     def derivative(self, x):
-        return 1 * (x > 0)
+        return np.where(x > 0, 1, 0)
 
 
 class Tan(Activation, prefix='tan'):

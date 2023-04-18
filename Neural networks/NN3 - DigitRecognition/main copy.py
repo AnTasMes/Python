@@ -11,53 +11,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
+class CNN_Layer:
 
-class CNN:
-
-    def __init__(self, input, filter_list: np.ndarray, activation: str = 'relu', padding: str = 'SamePadding', p_mode: str = 'max', count: int = 100) -> None:
-        self.input = input
+    def __init__(self, filter_list: np.ndarray, activation: str = 'relu', padding: str = 'SamePadding', p_mode: str = 'max') -> None:
         self.filter_list = filter_list
         self.activation = activation
         self.padding = padding
         self.p_mode = p_mode
 
-        self.data = self.prepare_data(count)
 
-    def prepare_data(self, count: int):
-        data = []
-        print('Preparing data...')
-        for cnt in range(count):
-            # print(f'IMAGE: {cnt+1}')
-            image = np.reshape(self.input[cnt], (28, 28))
-            input = np.zeros((image.shape[0], image.shape[1], 1))
+    def prepare(self, input):
+        features = self.convolution(input)
+        pooling = self.pooling(features)
 
-            input[:, :, 0] = image[:]
+        return pooling
 
-            input = input / 255
-
-            features = self.convolution(
-                input, self.filter_list, self.activation, self.padding)
-            pooling = self.pooling(features, self.p_mode)
-
-            #CNN.gen_image(pooling[:, :, 0]).show()
-
-            # features = self.convolution(
-            #     pooling, self.filter_list, self.activation, self.padding)
-            # pooling = self.pooling(features, self.p_mode)
-
-            data.append(pooling.flatten())
-
-        print('Data prepared!')
-
-        return data
-
-    @staticmethod
-    def gen_image(arr: np.ndarray) -> plt:
-        two_d = (np.reshape(arr, (arr.shape[0], arr.shape[1])) * 255)
-        plt.imshow(two_d, cmap='gray')
-        return plt
-
-    def convolution(self, img: np.ndarray, filter_list: np.ndarray, activation: str = 'relu', padding: str = 'SamePadding') -> np.ndarray:
+    def convolution(self, img: np.ndarray) -> np.ndarray:
         """
         Function convolution maps all chunks of an input, calculates their filters,
         and maps them into a feature_map for that layer
@@ -93,23 +62,23 @@ class CNN:
 
         """
         
-        if padding == 'SamePadding':
+        if self.padding == 'SamePadding':
             npad = ((1, 1), (1, 1), (0, 0))
             img = np.pad(img, npad, mode='constant')
 
-        feature_map = np.zeros((img.shape[0] - filter_list.shape[1] + 1,
-                                img.shape[1] - filter_list.shape[2] + 1,
-                                filter_list.shape[0] * img.shape[-1]))
+        feature_map = np.zeros((img.shape[0] - self.filter_list.shape[1] + 1,
+                                img.shape[1] - self.filter_list.shape[2] + 1,
+                                self.filter_list.shape[0] * img.shape[-1]))
 
         for i_num, i in enumerate(img.T):
-            for f_num, f in enumerate(filter_list):
+            for f_num, f in enumerate(self.filter_list):
 
-                index = f_num + (i_num * filter_list.shape[0])
+                index = f_num + (i_num * self.filter_list.shape[0])
 
                 curr_filter = f
-                if curr_filter.shape[0] != filter_list.shape[1] or curr_filter.shape[1] != filter_list.shape[2]:
+                if curr_filter.shape[0] != self.filter_list.shape[1] or curr_filter.shape[1] != self.filter_list.shape[2]:
                     print(
-                        f'Error: Filter doesnt match the shape of a filter list => {curr_filter.shape} : ({filter_list.shape[1:]})')
+                        f'Error: Filter doesnt match the shape of a filter list => {curr_filter.shape} : ({self.filter_list.shape[1:]})')
                 if curr_filter.shape[0] % 2 == 0 or curr_filter.shape[1] % 2 == 0:
                     print('Error: Filters must be an odd dimensional matrix')
                     sys.exit()
@@ -120,12 +89,45 @@ class CNN:
 
                     # calculates the activation
                     feature_map[:, :, index] = Activation(
-                        prefix=activation).function(feature_map[:, :, index])
-                
-            # CNN.gen_image(feature_map[:, :, f_num]).show()
+                        prefix=self.activation).function(feature_map[:, :, index])
 
         return feature_map
+    
+    def pooling(self, f_map: np.ndarray) -> np.ndarray:
+        """
+        Calculates pool maps for layers of features
 
+        Parameters
+        ----------
+        f_map : np.ndarray
+            Features map of shape `(W, H, number_of_filters/maps)`
+        mode : str
+            Mode for which pooling will be done.
+            `max` -> Maximum pooling
+            `min` -> Minimum pooling
+            `avg` -> Average pooling
+
+        Returns
+        -------
+        np.ndarray
+            Calculated pool map half the size of f_map
+        """
+
+        W, H, NUM = (np.uint16(f_map.shape[0]/2),
+                     np.uint16(f_map.shape[1]/2), f_map.shape[-1])
+
+        pool_map = np.zeros((W, H, NUM))
+
+        for m_num in range(f_map.shape[-1]):
+            curr_map = f_map[:, :, m_num]
+
+            if self.p_mode not in ('max', 'min', 'avg'):
+                print(f'Error: {self.p_mode} pooling is not supported')
+                sys.exit()
+            else:
+                pool_map[:, :, m_num] = self._pool(curr_map, self.p_mode, W, H)[:]
+        return pool_map 
+    
     def _conv(self, img: np.ndarray, cr_f: np.ndarray) -> np.ndarray:
         """
         Calculates convolutions for a given filter and returns a result array
@@ -198,40 +200,47 @@ class CNN:
                     result[i//2][j//2] = np.average(cr_f_m[i:i+2, j:j+2])
         return result
 
-    def pooling(self, f_map: np.ndarray, mode: str) -> np.ndarray:
-        """
-        Calculates pool maps for layers of features
+class CNN:
 
-        Parameters
-        ----------
-        f_map : np.ndarray
-            Features map of shape `(W, H, number_of_filters/maps)`
-        mode : str
-            Mode for which pooling will be done.
-            `max` -> Maximum pooling
-            `min` -> Minimum pooling
-            `avg` -> Average pooling
+    def __init__(self, layers: list[CNN_Layer]) -> None:
+        self.layers = layers
 
-        Returns
-        -------
-        np.ndarray
-            Calculated pool map half the size of f_map
-        """
+    def prepare_data(self, input_data, count: int = 100):
+        output_data = []
+        print('Preparing data...')
+        for cnt in range(count):
+            # print(f'IMAGE: {cnt+1}')
+            image = np.reshape(input_data[cnt], (28, 28))
+            input = np.zeros((image.shape[0], image.shape[1], 1))
 
-        W, H, NUM = (np.uint16(f_map.shape[0]/2),
-                     np.uint16(f_map.shape[1]/2), f_map.shape[-1])
+            input[:, :, 0] = image[:]
 
-        pool_map = np.zeros((W, H, NUM))
+            
 
-        for m_num in range(f_map.shape[-1]):
-            curr_map = f_map[:, :, m_num]
+            if cnt % 100 == 0:
+                print(f'IMAGE: {cnt+1}')
 
-            if mode not in ('max', 'min', 'avg'):
-                print(f'Error: {mode} pooling is not supported')
-                sys.exit()
-            else:
-                pool_map[:, :, m_num] = self._pool(curr_map, mode, W, H)[:]
-        return pool_map
+            for layer in self.layers:
+                input = layer.prepare(input)
+
+            output_data.append(input.flatten())
+
+        print('Data prepared!')
+
+        output_data = np.array(output_data)
+
+        # limit output to 0 and 1
+        output_data[output_data > 1] = 1
+        output_data[output_data < 0] = 0
+        
+        return output_data
+
+    @staticmethod
+    def gen_image(arr: np.ndarray) -> plt:
+        two_d = (np.reshape(arr, (arr.shape[0], arr.shape[1])) * 255)
+        plt.imshow(two_d, cmap='gray')
+        return plt
+
 
 
 def main():
@@ -276,7 +285,7 @@ def main():
         [1, 1, 1]]])
     # data = np.array([CNN(input, l1_filter, 'relu').data])
     
-    train_image_count = 100
+    train_image_count = 600
     training_output = []
     #CNN.gen_image(input[:, :, 0]).show()
     # print(output[0])
@@ -285,84 +294,57 @@ def main():
         output[labels[i]] = 1
         training_output.append(output)
 
-        # like this you print the output and show the resulting image
-        # image = np.reshape(images[i], (28, 28))
-        # input[:, :, 0] = image[:]
-        # CNN.gen_image(input[:, :, 0]).show()
-        # print("Label: ", labels[i], "Output: ", output)
-
-
-    training_input = np.array(CNN(images, l1_filter, count=train_image_count, activation='relu').data)
     training_output = np.array(training_output)
-    print(training_input.shape)
+
+
+    layer_1 = CNN_Layer(l1_filter, 'relu', 'SamePadding', 'max')
+    layer_2 = CNN_Layer(l1_filter, 'relu', 'SamePadding', 'max')
+
+    cnn_model = CNN([layer_1])
+
+    training_input = cnn_model.prepare_data(images, train_image_count)
 
     activation_dict = {
         '0': 'sigmoid',
         '1': 'sigmoid',
-        '2': 'sigmoid'
+        '2': 'sigmoid',
+        '3': 'lrelu'
     }
 
-    perc = Perceptron(training_input.shape[1], [
-                      training_input.shape[1]//2, training_input.shape[1]//2, training_input.shape[1]//3], 10, fun=activation_dict, base_fun='sigmoid')
-
-    images_te, labels_te = mndata.load_testing()
-    testing_input = np.array(CNN(images_te, l1_filter, count=200, activation='relu').data)
+    perc = Perceptron(fun=activation_dict, base_fun='sigmoid')\
+                                                .setLayers( 
+                                                    training_input.shape[1], [
+                                                    training_input.shape[1]//2, 
+                                                    training_input.shape[1]//2,
+                                                    training_input.shape[1]//4],
+                                                    10)\
+                                                .setLearningRate(0.01)\
+                                                .setWeights()\
+                                                .setBias()\
+                                                .build_me()
+    
+    
+    print(training_input.shape, len(training_output))
 
     perc.Train(training_input, training_output, 10000)
+
     hits = 0
 
-    testing_sample = 198
-    for i in range(testing_sample):
+    testing_sample_count = 200
+
+    testing_sample_data, testing_sample_labels = mndata.load_testing()
+    testing_input = cnn_model.prepare_data(testing_sample_data, testing_sample_count)
+
+    for i in range(testing_sample_count):
         res = perc.FeedForwardFlex(np.array([testing_input[i]]).T, vb=0)
         val = [int(i) for i in (res[-1] == np.max(res[-1]))]
         
-        if val.index(1) == labels_te[i]:
+        if val.index(1) == testing_sample_labels[i]:
             hits += 1
         else:
-            print("Label: ", labels_te[i], "Output: ", val.index(1))
-
-        
-    print("Accuracy: ")
-    print(hits/testing_sample)
-
-
-    # print(data)
-    # features = convolution(input, l1_filter)
-    # pools = pooling(features, mode='max')
-    # print(len(pools.flatten()))
-
-    # features = convolution(pools, l1_filter)
-
-    # l1_filter[0, :, :] = np.array([[
-    #     [-1, 0, 1],
-    #     [-1, 0, 1],
-    #     [-1, 0, 1]]])
-
-    # l1_filter[0] = np.pad(l1_filter[0], 1)
-
-    # print(l1_filter[0, :, :])
-
-    # for p in range(pools.shape[-1]):
-    #     gen_image(pools[:, :, p]).show()
-
-    # for i in range(features.shape[-1]):
-    #     gen_image(features[:, :, i]).show()
-
-    # filter = np.array([[1, 1, 1, 1], [0, 0, 0, 0], [-1, -1, -1, -1]])
-
-    # filter = np.pad(filter, 1, mode='constant')
-
-    # for i in range(0, filter.shape[0]-2, 2):
-    #     for j in range(0, filter.shape[1]-2, 2):
-    #         print(np.max(filter[i:i+2, j:j+2]))
-    #     print
-
+            print("Label: ", testing_sample_labels[i], "Output: ", val.index(1))
+    
+    print(f'Accuracy: {hits/testing_sample_count*100}%')
 
 if __name__ == '__main__':
     main()
-
-
-# TO DO LIST:
-# Srediti ovo da bude klasa
-# Povezati sa Perceptron-om
-# Omoguciti racunanje vise kanala (RGB)
